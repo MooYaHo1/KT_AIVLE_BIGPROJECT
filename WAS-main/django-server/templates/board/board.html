@@ -1,0 +1,145 @@
+{% extends "../home/layout.html" %}
+{% load static %}
+{% load namespace_tags %}
+
+{% block contents %}
+{% namespaced_url namespace namespace as board %}
+{% namespaced_url namespace 'create' as create %}
+<link href="{% static '/board/css/board.css' %}" rel="stylesheet" />
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="py-3 mb-4"><span class="text-muted fw-light">게시판</span></h4>
+
+    <div class="board">
+        <!-- Category List Table -->
+        <div class="card">
+            <div class="card-datatable table-responsive">
+                <div id="board" class="dt-bootstrap5 no-footer">
+                    <div class="card-header d-flex flex-wrap py-0 justify-content-sm-between">
+                        <div class="me-5 ms-n2 pe-5">
+                            <form action="{% url board %}" method="get">
+                                {% csrf_token %}
+                                <label><input name="q" type="search" class="form-control" placeholder="{{ q|default:'Search' }}" v-model="searchQuery"/></label>
+                            </form>
+                        </div>
+                        <div class="d-flex justify-content-start justify-content-md-end align-items-baseline">
+                            <div class="dt-action-buttons d-flex align-items-start align-items-md-center justify-content-sm-center mb-3 mb-sm-0 gap-3 pt-0">
+                                <div class="mt-0" >
+                                    <label>
+                                        <form action="{% url board %}" method="get">
+                                            {% csrf_token %}
+                                            <select name="per" class="form-select" onchange="this.form.submit();">
+                                                {% for i in per_list %}
+                                                    <option value="{{i}}" {% if i == per %}selected{% endif %}>{{i}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </form>
+                                    </label>
+                                </div>
+                                {% if not namespace == 'notice' or user.is_superuser %}
+                                    <div class="dt-buttons">
+                                        <button class="dt-button add-new btn btn-primary ms-2">
+                                            <a href="{% url create %}"><i class="bx bx-plus me-0 me-sm-1"></i>새 글 쓰기</a>
+                                        </button>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <table class="table border-top dataTable no-footer dtr-column collapsed">
+                        <thead>
+                            <tr>
+                                <th class="control sorting_disabled title"></th>
+                                <th>제목</th>
+                                <th class="text-nowrap text-sm-end sorting_disabled created">작성 시간</th>
+                                <th class="text-nowrap text-sm-end sorting author">작성자</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="odd" v-for="post in posts">
+                                <td class="control" tabindex="0"></td>
+                                <td class="sorting_1">
+                                    <div class="d-flex align-items-center">
+                                        <a class="d-flex flex-column justify-content-center" :href="'/board/'+post.id">
+                                            <div>
+                                                <span v-if="post.category=='Notice'">[공지]</span>
+                                                <span v-if="post.category=='QnA'">[질문]</span>
+                                                <span v-if="post.category=='Community'">[자유]</span>
+                                                <span class="text-body text-wrap fw-medium" :class="{'notice': post.category=='Notice'}">[[ post.title ]]</span>
+                                                <span class="comments-count">[[ post.comments_count ]]</span>
+                                            </div>
+                                            <span class="text-muted text-truncate mb-0 d-none d-sm-block"><small>Tag</small></span>
+                                        </a>
+                                    </div>
+                                </td>
+                                <td><div class="text-sm-end created">[[ post.created ]]</div></td>
+                                <td>
+                                    <div class="fw-medium text-sm-end flex-row-reverse d-sm-flex align-items-sm-center">
+                                        <div class="avatar"><img :src="[[ post.avatar_url ]]"/></div>
+                                        <div class="author">[[ post.author ]]</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <br/>
+                    <div class="row mx-2">
+                        <div class="col-sm-12 col-md-6"><div role="status"></div></div>
+                        <div class="col-sm-12 col-md-6">
+                            <div class="paging_simple_numbers">
+                                <ul class="pagination">
+                                    <li class="paginate_button page-item previous {% if page == 1 %}disabled{% endif %}">
+                                        <a href="{% url board %}?page={{page|add:'-1'}}" aria-disabled="true" role="link" data-dt-idx="previous" tabindex="0" class="page-link">이전</a>
+                                    </li>
+                                    {% for i in board_list %}
+                                    <li class="paginate_button page-item {% if i == page %}active{% endif %}">
+                                        <a href="{% url board %}?page={{i}}" role="link" aria-current="page" data-dt-idx="0" tabindex="0" class="page-link">{{ i }}</a>
+                                    </li>
+                                    {% endfor %}
+                                    <li class="paginate_button page-item next {% if page == last %}disabled{% endif %}" >
+                                        <a href="{% url board %}?page={{page|add:'1'}}" role="link" data-dt-idx="next" tabindex="0" class="page-link">다음</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+        var post_all = [
+            {% for post in post_all %}
+            {
+                id: '{{ post.id }}',
+                title: '{{ post.title }}',
+                author: '{{ post.author }}',
+                created: '{{ post.created }}',
+                avatar_url: '{{ post.author.avatar.url }}',
+                comments_count: '{{ post.comments.count }}',
+                category: '{{ post.category }}',
+            },
+            {% endfor %}
+        ]
+
+        new Vue({
+            delimiters: ["[[", "]]"],
+            el: "#board",
+            data: {
+                searchQuery: '',
+            },
+            computed: {
+                posts() {
+                    return post_all.filter(post => {
+                        return post.title.toLowerCase().includes(this.searchQuery)
+                            || post.author.toLowerCase().includes(this.searchQuery);
+                    });
+                }
+            }
+        });
+    });
+</script>
+
+{% endblock %}

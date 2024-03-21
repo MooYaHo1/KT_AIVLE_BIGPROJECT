@@ -1,0 +1,37 @@
+.board .card-header {
+    margin: 10px 0;
+}
+.dt-buttons a {
+    color: white;
+}
+
+.table thead .title {
+    width: 4px;
+}
+.table thead .created {
+    width: 250px;
+}
+.table thead .author {
+    width: 100px;
+}
+.table tbody .created,
+.table tbody .author {
+    font-size: 13px;
+}
+.table tbody .avatar img {
+    border-radius: 50%;
+    width: 2.375rem;
+    height: 2.375rem;
+}
+.table tbody .author {
+    margin-right: 10px;
+}
+
+.comments-count {
+    color: #febe98;
+    font-size: 12px;
+}
+
+.notice {
+    color: crimson !important;
+}

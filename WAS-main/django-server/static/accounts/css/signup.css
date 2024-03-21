@@ -1,0 +1,92 @@
+.signup-container {
+    padding: 40px 20%;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-top: 100;
+    margin-bottom: 200;
+}
+
+.signup-container h2 {
+    color: black;
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+
+.signup-container input {
+    padding: 10px;
+    margin-bottom: 16px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-sizing: border-box;
+}
+
+.signup-container button {
+    padding: 12px;
+    background-color: gray;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: row;
+}
+
+.basic-forms {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 60%;
+}
+.basic-forms label {
+    display: none;
+}
+.basic-forms input {
+    margin: 0;
+    border-radius: 0;
+    width: 100%;
+}
+.basic-forms #id_first_name,
+.basic-forms #id_last_name {
+    width: 50%;
+}
+.basic-forms #id_username {
+    border-radius: 0 10px 0 0;
+}
+.basic-forms #id_password2 {
+    border-radius: 0 0 10px 0;
+}
+.basic-forms #id_password1_helptext {
+    display: none;
+}
+.basic-forms #id_avatar {
+    display: none;
+    border-radius: 10px 0 10px 0;
+}
+.avatar-form {
+    display: flex;
+    width: 40%;
+    height: 225px;
+    border-radius: 10px 0 0 10px;
+    border: 1px solid #ccc;
+    justify-content: center;
+    align-items: center;
+}
+.avatar-form label {
+    cursor: pointer;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+}
+.avatar-form img {
+    border-radius: 10px 0 0 10px;
+    width: 100%;
+    height: 100%;
+}
+
+.helptext {
+    display: none;
+}

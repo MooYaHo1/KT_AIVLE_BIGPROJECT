@@ -1,0 +1,242 @@
+{% extends "../home/base.html" %}
+{% load static %}
+
+{% block content %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+<div class="container-xxl flex-grow-1 container-p-y" style="position: relative;">
+    <h4 class="py-3 mb-4">
+        <span class="text-muted fw-light">성취도 평가 / </span>{{ lecture_name }} / {{ video_name }}
+    </h4>
+
+    <!-- Card Border Shadow -->
+    <div class="card-body">
+        <div class="d-flex align-items-center mb-2 pb-1">
+            <div class="avatar me-2">
+                <span class="avatar-initial rounded bg-label-primary"><i class="bx bxs-truck"></i></span>
+            </div>
+            <h4 class="ms-1 mb-0">등급</h4>
+        </div>
+        <h1 id="grade" style="position: absolute; right: 20px; z-index: 99; top: 20px;">
+            {% if score >= 80 %}
+                <img src="{% static 'evaluation\img\A.png' %}" style="width:150px">
+            {% elif score >= 60 %}
+                <img src="{% static 'evaluation\img\B.png' %}" style="width:150px">
+            {% elif score >= 40 %}
+                <img src="{% static 'evaluation\img\C.png' %}" style="width:150px">
+            {% elif score >= 20 %}
+                <img src="{% static 'evaluation\img\D.png' %}" style="width:150px">
+            {% else %}
+                <img src="{% static 'evaluation\img\F.png' %}" style="width:150px">
+            {% endif %}
+    </div>
+    <div class="row">
+        <div class="col-sm-6 col-lg-6 mb-4">
+            <div class="card card-border-shadow-primary h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2 pb-1">
+                        <div class="avatar me-2">
+                            <span class="avatar-initial rounded bg-label-primary"><i class="bx bxs-truck"></i></span>
+                        </div>
+                        <h4 class="ms-1 mb-0">정답수</h4>
+                    </div>
+                    <p class="mb-1">{{ num_correct }} 문제를 맞췄습니다!</p>
+                    <p class="mb-0">
+                        <small class="text-muted">축하드립니다!</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-6 mb-4">
+            <div class="card card-border-shadow-warning h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2 pb-1">
+                        <div class="avatar me-2">
+                            <span class="avatar-initial rounded bg-label-warning"><i class="bx bx-error"></i></span>
+                        </div>
+                        <h4 class="ms-1 mb-0">오답수</h4>
+                    </div>
+                    <p class="mb-1">{{ num_wrong }} 문제를 틀렸습니다!</p>
+                    <p class="mb-0">
+                        <small class="text-muted">이번 주도 문제를 풀어보셨군요! 매주 꾸준히 도전하는 것 자체가 이미 큰 성취입니다. </small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--/ Card Border Shadow -->
+    <div class="row">
+        <!-- Vehicles overview -->
+        <div class="col-xxl-12 mb-4 order-5 order-xxl-0">
+            <div class="card h-100">
+                <div class="card-header">
+                    <div class="card-title mb-0">
+                        <h5 class="m-0">평가</h5>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-wrapper">
+                        <div class="gender-chart" style="height: 200px; width: 100%; magin:20px 0">
+                            <canvas id="todayEvalsBar"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <div class="gender-chart" style="height: 300px; width: 100%; magin:20px 0">
+                            <canvas id="eachEvalsBar"></canvas>
+                        </div>
+                    </div>
+
+                    <ul class="table-border-bottom-0">
+                        {% for detail_eval in detail_evals %}
+                            <li class="d-flex justify-content-between" style="padding: 20px">
+                                <div>
+                                    <div class="ps-0" style="display: flex; padding: 10px;">
+                                        <span style="min-width: 90px; opacity: .7;"><i class="bx bx-message-square-dots"></i>학생 대답: </span>
+                                        <span class="mb-0 fw-normal">{{ detail_eval.student_saying }}</span>
+                                    </div>
+                                    <div class="ps-0" style="display: flex; padding: 10px;">
+                                        <span style="min-width: 90px; opacity: .7;"><i class="bx bx-down-arrow-circle"></i>평가: </span>
+                                        <span class="mb-0 fw-normal">{{ detail_eval.explation }}</span>
+                                    </div>
+                                </div>
+                                <div class="text-end pe-0" style="display: flex; padding: 10px; min-width: 50px; align-items: center">
+                                    <span class="fw-medium">{{ detail_eval.score }}점</span>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!--/ Vehicles overview -->
+    </div>
+    <!-- / Content -->
+    <!-- Content wrapper -->
+    <script>
+        const num_correct = {{ num_correct }};
+        const num_wrong = {{ num_wrong }};
+        const detail_evals = {{ detail_evals|safe }}
+
+        const rate_correct = num_correct/(num_correct + num_wrong)*100
+        const rate_wrong = num_wrong/(num_correct + num_wrong)*100
+
+        var todayEvalsBar = document.getElementById('todayEvalsBar').getContext('2d');
+        var myChart = new Chart(todayEvalsBar, {
+            type: 'bar',
+            data: {
+                labels: ['오늘의 평가'],
+                datasets: [
+                    {
+                        label: '정답',
+                        data: [rate_correct],
+                        backgroundColor: '#6464ff',
+                    },
+                    {
+                        label: '오답',
+                        data: [rate_wrong],
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    },
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                plugins: {
+                },
+                maintainAspectRatio: false,
+                responsive: true,
+                scales: {
+                    x: {
+                        stacked: true,
+                    },
+                    y: {
+                        stacked: true
+                    }
+                }
+            }
+        });
+
+
+
+        eachScores = detail_evals.map(({score, detail})=> ({ label: '', data: [score], backgroundColor: '#FEBE98', }))
+
+        var eachEvalsBar = document.getElementById('eachEvalsBar').getContext('2d');
+        var myChart = new Chart(eachEvalsBar, {
+            type: 'bar',
+            data: {
+                labels: [''],
+                datasets: eachScores
+            },
+            options: {
+                plugins: {
+                },
+                legend: {
+                    display: false,
+                },
+                maintainAspectRatio: false,
+                responsive: true,
+                scales: {
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: '개별 정답퍼센트'
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: 100,
+                    }
+                }
+            }
+        });
+
+
+        history_evals = {{ history_evals|safe }}
+
+        labels = history_evals.map(({score, evaluation_date})=> evaluation_date)
+        data = history_evals.map(({score, evaluation_date})=> score)
+
+
+        var historyChart = document.getElementById('historyChart').getContext('2d');
+        var myChart = new Chart(historyChart, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: '정답률',
+                        data,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 2
+                    },
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                },
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: '시간'
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: '정답률'
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: 100,
+                    }
+                }
+            }
+        });
+    </script>
+    {% endblock %}
+</div>

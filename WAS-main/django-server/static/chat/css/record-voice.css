@@ -1,0 +1,15 @@
+#record-button-loading {
+    font-size: 400px !important;
+    position: absolute;
+    top: calc(50% - 200px);
+    left: calc(50% - 200px);
+}
+@keyframes blink-effect {
+    50% {
+        opacity: 0;
+    }
+}
+
+.blink {
+    animation: blink-effect 2s ease-in-out infinite;
+}
